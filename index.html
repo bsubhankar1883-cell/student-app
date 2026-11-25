@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>College Library - Student Portal</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- QRCode.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f1f5f9; }
+        .app-container { max-width: 480px; margin: 0 auto; min-height: 100vh; background: #ffffff; box-shadow: 0 4px 20px rgba(0,0,0,0.08); display: flex; flex-direction: column; position: relative; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800">
+
+<div class="app-container">
+
+    <!-- Top Bar -->
+    <div id="topBar" class="bg-[#1956A4] text-white px-5 py-4 flex items-center justify-between shadow-md hidden">
+        <div class="flex items-center space-x-2">
+            <span class="text-2xl">📚</span>
+            <div>
+                <h1 class="font-bold text-lg leading-tight">College Library</h1>
+                <p id="topBarSubtitle" class="text-xs text-blue-200">Student Portal</p>
+            </div>
+        </div>
+        <button onclick="showScreen('digitalIdScreen')" class="bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center space-x-1 transition">
+            <span>🪪</span><span>Digital ID</span>
+        </button>
+    </div>
+
+    <!-- MAIN CONTENT VIEW -->
+    <div id="contentArea" class="flex-1 overflow-y-auto hide-scrollbar p-5 pb-24">
+
+        <!-- SCREEN 1: LOGIN SCREEN -->
+        <div id="loginScreen" class="py-8">
+            <div class="text-center mb-8">
+                <div class="w-20 h-20 bg-blue-100 text-[#1956A4] rounded-2xl flex items-center justify-center text-4xl mx-auto shadow-sm mb-3">📚</div>
+                <h2 class="text-2xl font-black text-slate-900">College Library</h2>
+                <p class="text-sm text-slate-500 mt-1">Student Mobile Portal</p>
+            </div>
+
+            <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+                <h3 class="text-lg font-bold text-slate-800 mb-4">Sign In</h3>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Member ID or Email</label>
+                        <input id="loginInput" type="text" placeholder="e.g. 1 or student1@example.invalid" class="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#1956A4] outline-none">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Password</label>
+                        <input id="passwordInput" type="password" placeholder="••••••••" class="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#1956A4] outline-none">
+                    </div>
+
+                    <div id="loginError" class="text-xs text-red-600 font-semibold hidden"></div>
+
+                    <button onclick="performLogin()" class="w-full bg-[#1956A4] hover:bg-[#123E78] text-white font-bold py-3.5 rounded-xl text-sm shadow transition">
+                        Sign In
+                    </button>
+                </div>
+
+                <div class="mt-6 pt-4 border-t border-slate-100 text-center">
+                    <button onclick="showScreen('activateScreen')" class="text-xs text-[#1956A4] font-bold hover:underline">
+                        First Time? Activate Your Account
+                    </button>
+                </div>
+            </div>
+
+            <div class="mt-8 text-center bg-blue-50/70 border border-blue-200 rounded-xl p-3 text-xs text-slate-600">
+                <p class="font-bold text-[#1956A4]">Demo Test Credentials:</p>
+                <p class="mt-0.5">ID: <span class="font-mono font-bold text-slate-800">1</span> &bull; Pass: <span class="font-mono font-bold text-slate-800">student123</span></p>
+            </div>
+        </div>
+
+        <!-- SCREEN 2: ACTIVATE ACCOUNT -->
+        <div id="activateScreen" class="py-4 hidden">
+            <button onclick="showScreen('loginScreen')" class="text-xs font-bold text-[#1956A4] mb-4 flex items-center space-x-1">
+                <span>&larr;</span><span>Back to Sign In</span>
+            </button>
+            <h2 class="text-xl font-bold text-slate-900 mb-1">Activate Student Account</h2>
+            <p class="text-xs text-slate-500 mb-6">Enter details registered by your college librarian to create your password.</p>
+
+            <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Member ID (Library Card No)</label>
+                    <input id="actMemberId" type="number" placeholder="e.g. 1" class="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#1956A4] outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Registered College Email</label>
+                    <input id="actEmail" type="email" placeholder="student1@example.invalid" class="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#1956A4] outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Create New Password</label>
+                    <input id="actPassword" type="password" placeholder="At least 6 characters" class="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-[#1956A4] outline-none">
+                </div>
+                <div id="actError" class="text-xs text-red-600 font-semibold hidden"></div>
+                <button onclick="performActivation()" class="w-full bg-[#1956A4] hover:bg-[#123E78] text-white font-bold py-3.5 rounded-xl text-sm shadow transition">
+                    Activate & Save Password
+                </button>
+            </div>
+        </div>
+
+        <!-- SCREEN 3: DASHBOARD SCREEN -->
+        <div id="dashboardScreen" class="hidden space-y-5">
+            <!-- Welcome Banner -->
+            <div class="bg-gradient-to-br from-[#1956A4] to-[#123E78] text-white rounded-2xl p-5 shadow-md">
+                <span class="text-xs text-blue-200 font-medium">Welcome back,</span>
+                <h2 id="dashStudentName" class="text-2xl font-bold mt-0.5">Student Name</h2>
+                <p id="dashStudentInfo" class="text-xs text-blue-100 mt-1">ID: #1 | CSE - Semester 2</p>
+
+                <div class="mt-4">
+                    <button onclick="showScreen('digitalIdScreen')" class="bg-white text-[#1956A4] font-bold text-xs px-4 py-2 rounded-xl shadow-sm hover:bg-blue-50 transition">
+                        🪪 View Digital Library ID
+                    </button>
+                </div>
+            </div>
+
+            <!-- KPI Metric Counters -->
+            <div class="grid grid-cols-3 gap-3">
+                <div class="bg-white border border-slate-200 rounded-xl p-3 text-center shadow-sm">
+                    <div id="statIssued" class="text-2xl font-black text-[#1956A4]">0</div>
+                    <div class="text-[11px] text-slate-500 mt-0.5">Issued</div>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-xl p-3 text-center shadow-sm">
+                    <div id="statOverdue" class="text-2xl font-black text-red-600">0</div>
+                    <div class="text-[11px] text-slate-500 mt-0.5">Overdue</div>
+                </div>
+                <div class="bg-white border border-slate-200 rounded-xl p-3 text-center shadow-sm">
+                    <div id="statFines" class="text-xl font-black text-amber-600">₹0</div>
+                    <div class="text-[11px] text-slate-500 mt-0.5">Fines</div>
+                </div>
+            </div>
+
+            <!-- Service Tiles -->
+            <div class="space-y-3 pt-2">
+                <h3 class="font-bold text-slate-900 text-sm uppercase tracking-wider">Library Services</h3>
+
+                <div onclick="showScreen('myBooksScreen')" class="bg-white border border-slate-200 hover:border-blue-400 p-4 rounded-xl flex items-center space-x-4 cursor-pointer shadow-sm transition">
+                    <div class="text-3xl">📖</div>
+                    <div class="flex-1">
+                        <div class="font-bold text-slate-800 text-sm">My Borrowed Books</div>
+                        <div class="text-xs text-slate-500">Active loans, return dates & due alerts</div>
+                    </div>
+                    <div class="text-slate-400">&rsaquo;</div>
+                </div>
+
+                <div onclick="showScreen('catalogScreen')" class="bg-white border border-slate-200 hover:border-blue-400 p-4 rounded-xl flex items-center space-x-4 cursor-pointer shadow-sm transition">
+                    <div class="text-3xl">🔍</div>
+                    <div class="flex-1">
+                        <div class="font-bold text-slate-800 text-sm">Search Library Catalog</div>
+                        <div class="text-xs text-slate-500">Check book availability & reserve copies</div>
+                    </div>
+                    <div class="text-slate-400">&rsaquo;</div>
+                </div>
+
+                <div onclick="showScreen('historyScreen')" class="bg-white border border-slate-200 hover:border-blue-400 p-4 rounded-xl flex items-center space-x-4 cursor-pointer shadow-sm transition">
+                    <div class="text-3xl">📜</div>
+                    <div class="flex-1">
+                        <div class="font-bold text-slate-800 text-sm">Borrowing History & Fines</div>
+                        <div class="text-xs text-slate-500">Past returned books & payment records</div>
+                    </div>
+                    <div class="text-slate-400">&rsaquo;</div>
+                </div>
+            </div>
+
+            <button onclick="performLogout()" class="w-full mt-6 py-3 border border-red-300 text-red-600 font-bold rounded-xl text-xs hover:bg-red-50 transition">
+                Sign Out
+            </button>
+        </div>
+
+        <!-- SCREEN 4: DIGITAL ID CARD -->
+        <div id="digitalIdScreen" class="hidden">
+            <button onclick="showScreen('dashboardScreen')" class="text-xs font-bold text-[#1956A4] mb-3 flex items-center space-x-1">
+                <span>&larr;</span><span>Back to Dashboard</span>
+            </button>
+
+            <div class="text-center mb-4">
+                <h2 class="text-lg font-bold text-slate-900">Digital Library ID</h2>
+                <p class="text-xs text-slate-500">Show this QR code at library counter to issue/return books.</p>
+            </div>
+
+            <div class="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-lg">
+                <div class="bg-[#1956A4] text-white p-5 text-center">
+                    <h3 class="text-base font-black tracking-widest">COLLEGE LIBRARY</h3>
+                    <p class="text-xs text-blue-200 mt-0.5">Student Membership Card</p>
+                </div>
+
+                <div class="p-6 flex flex-col items-center text-center">
+                    <div id="qrcodeContainer" class="p-4 bg-white border border-slate-200 rounded-2xl shadow-inner mb-4 flex justify-center items-center"></div>
+
+                    <h4 id="cardName" class="text-xl font-bold text-slate-900">Student Name</h4>
+                    <p id="cardMemberId" class="text-sm font-black text-[#1956A4] mt-1">Member ID: #1</p>
+                    <p id="cardDept" class="text-xs text-slate-500 mt-1">Dept: CSE (Sem 2)</p>
+                    <p id="cardEmail" class="text-xs text-slate-400 mt-0.5">student1@example.invalid</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCREEN 5: MY BORROWED BOOKS -->
+        <div id="myBooksScreen" class="hidden space-y-4">
+            <div class="flex items-center justify-between">
+                <button onclick="showScreen('dashboardScreen')" class="text-xs font-bold text-[#1956A4] flex items-center space-x-1">
+                    <span>&larr;</span><span>Back</span>
+                </button>
+                <h2 class="text-base font-bold text-slate-900">My Borrowed Books</h2>
+                <div class="w-8"></div>
+            </div>
+
+            <div id="myBooksList" class="space-y-3">
+                <div class="text-center py-10 text-xs text-slate-400">Loading your loans...</div>
+            </div>
+        </div>
+
+        <!-- SCREEN 6: CATALOG SEARCH -->
+        <div id="catalogScreen" class="hidden space-y-4">
+            <div class="flex items-center justify-between">
+                <button onclick="showScreen('dashboardScreen')" class="text-xs font-bold text-[#1956A4] flex items-center space-x-1">
+                    <span>&larr;</span><span>Back</span>
+                </button>
+                <h2 class="text-base font-bold text-slate-900">Library Catalog</h2>
+                <div class="w-8"></div>
+            </div>
+
+            <div class="relative">
+                <input id="catalogSearchInput" type="text" oninput="handleSearch(this.value)" placeholder="Search by Title, Author, ISBN..." class="w-full pl-10 pr-4 py-3 bg-white border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-[#1956A4] outline-none shadow-sm">
+                <span class="absolute left-3.5 top-3.5 text-slate-400 text-sm">🔍</span>
+            </div>
+
+            <div id="catalogList" class="space-y-3">
+                <div class="text-center py-10 text-xs text-slate-400">Loading books...</div>
+            </div>
+        </div>
+
+        <!-- SCREEN 7: HISTORY SCREEN -->
+        <div id="historyScreen" class="hidden space-y-4">
+            <div class="flex items-center justify-between">
+                <button onclick="showScreen('dashboardScreen')" class="text-xs font-bold text-[#1956A4] flex items-center space-x-1">
+                    <span>&larr;</span><span>Back</span>
+                </button>
+                <h2 class="text-base font-bold text-slate-900">Borrowing History</h2>
+                <div class="w-8"></div>
+            </div>
+
+            <div id="historyList" class="space-y-3">
+                <div class="text-center py-10 text-xs text-slate-400">Loading history...</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bottom Navigation Bar (Visible when logged in) -->
+    <div id="bottomNav" class="bg-white border-t border-slate-200 px-6 py-2.5 flex justify-around items-center absolute bottom-0 left-0 right-0 hidden shadow-lg">
+        <button onclick="showScreen('dashboardScreen')" class="flex flex-col items-center text-xs text-[#1956A4] font-bold">
+            <span class="text-lg">🏠</span><span>Home</span>
+        </button>
+        <button onclick="showScreen('myBooksScreen')" class="flex flex-col items-center text-xs text-slate-500 hover:text-[#1956A4]">
+            <span class="text-lg">📖</span><span>My Books</span>
+        </button>
+        <button onclick="showScreen('catalogScreen')" class="flex flex-col items-center text-xs text-slate-500 hover:text-[#1956A4]">
+            <span class="text-lg">🔍</span><span>Search</span>
+        </button>
+        <button onclick="showScreen('digitalIdScreen')" class="flex flex-col items-center text-xs text-slate-500 hover:text-[#1956A4]">
+            <span class="text-lg">🪪</span><span>Card</span>
+        </button>
+    </div>
+
+</div>
+
+<!-- APPLICATION JAVASCRIPT LOGIC -->
+<script>
+    let currentStudent = null;
+
+    // Initialize state
+    window.addEventListener('DOMContentLoaded', () => {
+        const saved = localStorage.getItem('college_library_student');
+        if (saved) {
+            try {
+                currentStudent = JSON.parse(saved);
+                initDashboard();
+            } catch(e) {
+                showScreen('loginScreen');
+            }
+        } else {
+            showScreen('loginScreen');
+        }
+    });
+
+    function showScreen(screenId) {
+        const screens = ['loginScreen', 'activateScreen', 'dashboardScreen', 'digitalIdScreen', 'myBooksScreen', 'catalogScreen', 'historyScreen'];
+        screens.forEach(s => {
+            const el = document.getElementById(s);
+            if (el) el.classList.add('hidden');
+        });
+
+        const target = document.getElementById(screenId);
+        if (target) target.classList.remove('hidden');
+
+        const topBar = document.getElementById('topBar');
+        const bottomNav = document.getElementById('bottomNav');
+
+        if (screenId === 'loginScreen' || screenId === 'activateScreen') {
+            topBar.classList.add('hidden');
+            bottomNav.classList.add('hidden');
+        } else {
+            topBar.classList.remove('hidden');
+            bottomNav.classList.remove('hidden');
+        }
+
+        // Action per screen
+        if (screenId === 'dashboardScreen') loadDashboardData();
+        if (screenId === 'digitalIdScreen') renderDigitalId();
+        if (screenId === 'myBooksScreen') loadMyBooks();
+        if (screenId === 'catalogScreen') loadCatalog('');
+        if (screenId === 'historyScreen') loadHistory();
+    }
+
+    async function performLogin() {
+        const loginId = document.getElementById('loginInput').value.trim();
+        const password = document.getElementById('passwordInput').value;
+        const errEl = document.getElementById('loginError');
+
+        errEl.classList.add('hidden');
+        if (!loginId || !password) {
+            errEl.innerText = "Please enter Member ID/Email and Password.";
+            errEl.classList.remove('hidden');
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ loginId, password })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                currentStudent = data.student;
+                localStorage.setItem('college_library_student', JSON.stringify(currentStudent));
+                initDashboard();
+            } else {
+                errEl.innerText = data.message || "Invalid credentials.";
+                errEl.classList.remove('hidden');
+            }
+        } catch (e) {
+            errEl.innerText = "Cannot connect to API server: " + e.message;
+            errEl.classList.remove('hidden');
+        }
+    }
+
+    async function performActivation() {
+        const memberId = document.getElementById('actMemberId').value.trim();
+        const email = document.getElementById('actEmail').value.trim();
+        const newPassword = document.getElementById('actPassword').value;
+        const errEl = document.getElementById('actError');
+
+        errEl.classList.add('hidden');
+        if (!memberId || !email || !newPassword) {
+            errEl.innerText = "All fields are required.";
+            errEl.classList.remove('hidden');
+            return;
+        }
+
+        try {
+            const res = await fetch('/api/auth/activate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ memberId: parseInt(memberId), email, newPassword })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                alert("Account activated successfully! Please sign in.");
+                showScreen('loginScreen');
+            } else {
+                errEl.innerText = data.message || "Activation failed.";
+                errEl.classList.remove('hidden');
+            }
+        } catch(e) {
+            errEl.innerText = "Error: " + e.message;
+            errEl.classList.remove('hidden');
+        }
+    }
+
+    function initDashboard() {
+        if (!currentStudent) return;
+        document.getElementById('dashStudentName').innerText = currentStudent.name;
+        document.getElementById('dashStudentInfo').innerText = `ID: #${currentStudent.memberId} | ${currentStudent.department} (Sem ${currentStudent.semester})`;
+        showScreen('dashboardScreen');
+    }
+
+    async function loadDashboardData() {
+        if (!currentStudent) return;
+        try {
+            const res = await fetch(`/api/student/dashboard?memberId=${currentStudent.memberId}`);
+            const data = await res.json();
+            if (data.success) {
+                document.getElementById('statIssued').innerText = data.issuedCount;
+                document.getElementById('statOverdue').innerText = data.overdueCount;
+                document.getElementById('statFines').innerText = `₹${Math.round(data.totalFine)}`;
+            }
+        } catch(e) {}
+    }
+
+    function renderDigitalId() {
+        if (!currentStudent) return;
+        document.getElementById('cardName').innerText = currentStudent.name;
+        document.getElementById('cardMemberId').innerText = `Member ID: #${currentStudent.memberId}`;
+        document.getElementById('cardDept').innerText = `Dept: ${currentStudent.department} (Sem ${currentStudent.semester})`;
+        document.getElementById('cardEmail').innerText = currentStudent.email;
+
+        const qrContainer = document.getElementById('qrcodeContainer');
+        qrContainer.innerHTML = '';
+        new QRCode(qrContainer, {
+            text: `MEMBER:${currentStudent.memberId}`,
+            width: 180,
+            height: 180,
+            colorDark: "#1956A4",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.H
+        });
+    }
+
+    async function loadMyBooks() {
+        if (!currentStudent) return;
+        const listEl = document.getElementById('myBooksList');
+        listEl.innerHTML = '<div class="text-center py-6 text-xs text-slate-400">Loading your books...</div>';
+
+        try {
+            const res = await fetch(`/api/student/dashboard?memberId=${currentStudent.memberId}`);
+            const data = await res.json();
+
+            if (data.success && data.issuedBooks.length > 0) {
+                listEl.innerHTML = data.issuedBooks.map(b => {
+                    const isOverdue = b.status === 'OVERDUE';
+                    const isDueSoon = b.status === 'DUE_SOON';
+                    let badgeClass = "bg-green-100 text-green-700";
+                    let badgeText = `Due in ${b.daysRemaining} days`;
+
+                    if (isOverdue) {
+                        badgeClass = "bg-red-100 text-red-700";
+                        badgeText = `OVERDUE (${Math.abs(b.daysRemaining)}d)`;
+                    } else if (isDueSoon) {
+                        badgeClass = "bg-amber-100 text-amber-700";
+                    }
+
+                    return `
+                        <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+                            <div class="flex justify-between items-start">
+                                <div class="font-bold text-slate-900 text-sm">${b.title}</div>
+                                <span class="text-[10px] font-bold px-2.5 py-1 rounded-full ${badgeClass}">${badgeText}</span>
+                            </div>
+                            <div class="text-xs text-slate-500 mt-0.5">By ${b.author}</div>
+                            <div class="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-slate-100 text-xs">
+                                <div><span class="text-slate-400">Issued:</span> <span class="font-semibold text-slate-700">${b.issueDate.split('T')[0]}</span></div>
+                                <div><span class="text-slate-400">Due:</span> <span class="font-semibold text-slate-700">${b.dueDate.split('T')[0]}</span></div>
+                            </div>
+                            ${isOverdue ? `<div class="mt-2 text-xs font-bold text-red-600">⚠️ Fine due: ₹${b.currentFine.toFixed(2)}</div>` : ''}
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                listEl.innerHTML = '<div class="text-center py-10 text-xs text-slate-400">No books currently issued to you.</div>';
+            }
+        } catch(e) {
+            listEl.innerHTML = '<div class="text-center py-6 text-xs text-red-500">Failed to load books.</div>';
+        }
+    }
+
+    let searchDebounce = null;
+    function handleSearch(val) {
+        clearTimeout(searchDebounce);
+        searchDebounce = setTimeout(() => loadCatalog(val), 300);
+    }
+
+    async function loadCatalog(query) {
+        const listEl = document.getElementById('catalogList');
+        try {
+            const res = await fetch(`/api/books/search?query=${encodeURIComponent(query)}`);
+            const data = await res.json();
+
+            if (data.success && data.books.length > 0) {
+                listEl.innerHTML = data.books.map(book => {
+                    const hasCopies = book.available_copies > 0;
+                    return `
+                        <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+                            <div class="font-bold text-slate-900 text-sm">${book.title}</div>
+                            <div class="text-xs text-slate-500 mt-0.5">By ${book.author}</div>
+                            <div class="flex items-center space-x-2 mt-2">
+                                <span class="text-[10px] bg-blue-50 text-[#1956A4] font-semibold px-2 py-0.5 rounded">${book.category || 'General'}</span>
+                                <span class="text-[10px] bg-slate-100 text-slate-600 font-semibold px-2 py-0.5 rounded">${book.semester ? 'Sem ' + book.semester : 'All Sem'}</span>
+                                <span class="flex-1"></span>
+                                <span class="text-xs font-bold ${hasCopies ? 'text-green-600' : 'text-red-500'}">
+                                    ${hasCopies ? `${book.available_copies} / ${book.total_copies} Available` : 'Out of Stock'}
+                                </span>
+                            </div>
+                            ${!hasCopies ? `
+                                <button onclick="reserveBook(${book.book_id}, '${book.title}')" class="mt-3 w-full py-1.5 border border-amber-400 text-amber-700 text-xs font-bold rounded-lg hover:bg-amber-50 transition">
+                                    Reserve This Book
+                                </button>
+                            ` : ''}
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                listEl.innerHTML = '<div class="text-center py-10 text-xs text-slate-400">No books found.</div>';
+            }
+        } catch(e) {}
+    }
+
+    async function reserveBook(bookId, title) {
+        if (!currentStudent) return;
+        if (!confirm(`Reserve "${title}"?`)) return;
+
+        try {
+            const res = await fetch('/api/books/reserve', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ memberId: currentStudent.memberId, bookId })
+            });
+            const data = await res.json();
+            alert(data.message);
+        } catch(e) {
+            alert("Error: " + e.message);
+        }
+    }
+
+    async function loadHistory() {
+        if (!currentStudent) return;
+        const listEl = document.getElementById('historyList');
+        listEl.innerHTML = '<div class="text-center py-6 text-xs text-slate-400">Loading history...</div>';
+
+        try {
+            const res = await fetch(`/api/student/history?memberId=${currentStudent.memberId}`);
+            const data = await res.json();
+
+            if (data.success && data.history.length > 0) {
+                listEl.innerHTML = data.history.map(h => `
+                    <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm">
+                        <div class="font-bold text-slate-900 text-sm">${h.title}</div>
+                        <div class="text-xs text-slate-500 mt-0.5">By ${h.author}</div>
+                        <div class="flex justify-between items-center mt-2.5 pt-2.5 border-t border-slate-100 text-xs text-slate-500">
+                            <div>Returned: <span class="font-semibold text-slate-700">${h.return_date.split('T')[0]}</span></div>
+                            <div class="font-bold ${h.fine > 0 ? 'text-amber-600' : 'text-[#1956A4]'}">
+                                ${h.fine > 0 ? `Fine Paid: ₹${h.fine.toFixed(2)}` : 'No Fine Due'}
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                listEl.innerHTML = '<div class="text-center py-10 text-xs text-slate-400">No past returned books found.</div>';
+            }
+        } catch(e) {
+            listEl.innerHTML = '<div class="text-center py-6 text-xs text-red-500">Failed to load history.</div>';
+        }
+    }
+
+    function performLogout() {
+        localStorage.removeItem('college_library_student');
+        currentStudent = null;
+        showScreen('loginScreen');
+    }
+</script>
+
+</body>
+</html>
